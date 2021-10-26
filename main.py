@@ -1,8 +1,12 @@
 from flask import Flask, request, jsonify
 from collections import defaultdict
+import numpy as np
+import sys
 
 app = Flask(__name__)
 userDataMap = defaultdict(lambda:list)
+
+THRESHOLD = 30
 
 @app.route("/sendData", methods = ['POST'])
 def addData():
@@ -11,17 +15,31 @@ def addData():
     for key in sentData.keys():
         userDataMap[key] = sentData[key]
     # print(sentData)
-    # print(userDataMap)
+    print(userDataMap)
     return sentData
+
 '''
-function to allo fetch of data
-receives the client ID and tries to match it with the data
+function to allow fetch of data
+
+This function computes a similarity measure (Dot Product) between the received userID 
+and all the existing Data+ID enteries in the userDataMap
 '''
+
 @app.route("/fetchData", methods = ['POST'])
 def returnData():
-    userID = request.get_json(force=True)
-    # if userDataMap:
-    #     # for key, value in 
+    clientID = request.get_json(force=True)
+    maxRes = - sys.maxsize - 1
+    mostMatchedData = None
+    if userDataMap:
+        for key, data in userDataMap.items():
+            res = np.dot(clientID["ID"], data)
+            if res>maxRes:
+                maxRes = res
+                mostMatchedData = data
+            print(res)
 
+    if mostMatchedData and maxRes > THRESHOLD:
+        return {"data": mostMatchedData}
+    return {"data": None}
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=7001, debug=True)
