@@ -14,8 +14,6 @@ def addData():
     # sentData["1"].replace("\n", " ")
     for key in sentData.keys():
         userDataMap[key] = sentData[key]
-    # print(sentData)
-    print(userDataMap)
     return sentData
 
 '''
@@ -32,7 +30,7 @@ def returnData():
     mostMatchedData = None
     if userDataMap:
         for key, data in userDataMap.items():
-            res = np.dot(clientID["ID"], data)
+            res = abs(np.dot(clientID["ID"], data))
             if res>maxRes:
                 maxRes = res
                 mostMatchedData = data
